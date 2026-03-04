@@ -2,11 +2,11 @@ name: CI/CD for React App
 
 on:
   push:
-    branches: [ main ] # Chạy khi push vào nhánh main
+    branches: [ main ]
 
 jobs:
   build-and-push:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest # Job này vẫn build trên server GitHub cho nhanh
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -26,19 +26,19 @@ jobs:
 
   deploy:
     needs: build-and-push
-    runs-on: ubuntu-latest
+    runs-on: self-hosted # <--- SỬA Ở ĐÂY: Chạy trực tiếp trên AWS của bạn
     steps:
-      - name: Deploy to Server via SSH
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            # Pull image mới nhất
-            docker pull ${{ secrets.DOCKER_USERNAME }}/react-app:latest
-            # Dừng và xóa container cũ (nếu có)
-            docker stop react-container || true
-            docker rm react-container || true
-            # Chạy container mới
-            docker run -d --name react-container -p 3004:80 ${{ secrets.DOCKER_USERNAME }}/react-app:latest
+      - name: Pull and Run Container
+        run: |
+          # Login Docker để pull image (nếu là repo private)
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+          
+          # Pull image mới nhất
+          docker pull ${{ secrets.DOCKER_USERNAME }}/react-app:latest
+          
+          # Dừng và xóa container cũ
+          docker stop react-container || true
+          docker rm react-container || true
+          
+          # Chạy container mới trên port 3004
+          docker run -d --name react-container -p 3004:80 ${{ secrets.DOCKER_USERNAME }}/react-app:latest
