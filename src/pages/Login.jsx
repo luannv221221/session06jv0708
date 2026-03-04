@@ -12,7 +12,7 @@ function Login() {
                     <Form style={{ width: 500 }}>
 
                         <Form.Group className="mb-3" controlId="formBasicEmail">
-                            <Form.Label>Email address</Form.Label>
+                            <Form.Label>Email address KAKAKA thành công rồi</Form.Label>
                             <Form.Control type="email" placeholder="Enter email" />
                             <Form.Text className="text-muted">
                                 We'll never share your email with anyone else.
